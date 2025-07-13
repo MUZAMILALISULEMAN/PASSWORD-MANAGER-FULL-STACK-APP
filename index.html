@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Cyber Portal</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500&family=Sora:wght@500;600&family=VT323&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'sora', Tahoma, Geneva, Verdana, sans-serif
+    }
+
+    :root {
+      --background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+      --surface: rgba(18, 18, 51, 0.7);
+      --surface-hover: rgba(30, 30, 77, 0.85);
+      --primary-text: #e0f7ff;
+      --secondary-text: #a0b3ff;
+      --accent: #ff2a78;
+      --accent-secondary: #00e5ff;
+      --error: #ff3d57;
+      --success: #00ffb3;
+      --warning: #ffaa33;
+      --border: rgba(0, 231, 255, 0.3);
+      --glow: 0 0 15px var(--accent-secondary);
+    }
+
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      background: var(--background);
+      overflow: hidden;
+      color: var(--primary-text);
+      position: relative;
+    }
+
+    /* Matrix background effect */
+    .matrix-bg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      opacity: 0.15;
+      background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        rgba(0, 231, 255, 0.1) 2px,
+        rgba(0, 231, 255, 0.1) 4px
+      );
+      animation: matrixFlow 40s linear infinite;
+    }
+
+    @keyframes matrixFlow {
+      from { background-position: 0 0; }
+      to { background-position: 0 100%; }
+    }
+
+    /* Glowing particles effect */
+    .particles {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+    }
+
+    .particle {
+      position: absolute;
+      border-radius: 50%;
+      background: var(--accent-secondary);
+      box-shadow: 0 0 10px var(--accent-secondary), 0 0 20px var(--accent-secondary);
+      animation: float 15s infinite linear;
+    }
+
+    @keyframes float {
+      0% { transform: translateY(0) translateX(0); opacity: 0; }
+      10% { opacity: 1; }
+      90% { opacity: 0.7; }
+      100% { transform: translateY(-100vh) translateX(20vw); opacity: 0; }
+    }
+
+    /* Main container */
+    .container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+      max-width: 1200px;
+      min-height: 720px;
+      padding: 20px;
+      z-index: 10;
+    }
+
+    /* Card container - fixed height */
+    .card-container {
+      perspective: 1500px;
+      width: 100%;
+      max-width: 500px;
+      height: 600px; /* Fixed height for both sides */
+      z-index: 1000;
+    }
+
+    .card {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      transform-style: preserve-3d;
+      transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+      border-radius: 16px;
+    }
+
+    .card.flipped {
+      transform: rotateY(180deg);
+    }
+
+    .card-face {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      backface-visibility: hidden;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 40px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      overflow: hidden;
+      box-shadow: var(--glow);
+      transition: all 0.5s ease;
+    }
+
+    .card-face::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(0, 231, 255, 0.1) 0%, transparent 70%);
+      z-index: -1;
+      animation: rotate 20s linear infinite;
+    }
+
+    @keyframes rotate {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    .card-face.back {
+      transform: rotateY(180deg);
+    }
+
+    .card-face h2 {
+      font-size: 2.2em;
+      color: var(--accent-secondary);
+      text-align: center;
+      margin-bottom: 30px;
+      text-shadow: 0 0 10px rgba(0, 231, 255, 0.7);
+      letter-spacing: 1px;
+      position: relative;
+    }
+
+    .card-face h2::after {
+      content: '';
+      position: absolute;
+      bottom: -10px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 80px;
+      height: 3px;
+      background: var(--accent);
+      border-radius: 3px;
+      box-shadow: 0 0 10px var(--accent);
+    }
+
+    .form {
+      display: flex;
+      flex-direction: column;
+      gap: 25px;
+    }
+
+    .inputBox {
+      position: relative;
+      width: 100%;
+    }
+
+    .inputBox input {
+      width: 100%;
+      background: rgba(10, 10, 35, 0.6);
+      border: 1px solid var(--border);
+      padding: 18px 15px 8px 45px;
+      border-radius: 8px;
+      color: var(--primary-text);
+      font-size: 1em;
+      letter-spacing: 0.5px;
+      transition: all 0.3s ease;
+      outline: none;
+    }
+
+    .inputBox input:focus {
+      border-color: var(--accent-secondary);
+      box-shadow: 0 0 15px rgba(0, 231, 255, 0.3);
+    }
+
+    .inputBox i {
+      position: absolute;
+      left: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--secondary-text);
+      font-size: 18px;
+      transition: all 0.3s ease;
+    }
+
+    .inputBox input:focus ~ i {
+      color: var(--accent-secondary);
+      text-shadow: 0 0 10px var(--accent-secondary);
+    }
+
+.inputBox label {
+  font-family: 'manrope','sans-serif';
+  position: absolute;
+  left: 12%;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--secondary-text);
+  pointer-events: none;
+  transition: all 0.3s ease;
+  font-size: 1em;
+  z-index: 2; 
+
+  /* Ensure label is above input */
+  /* Match input background */
+  padding: 0 5px; /* Add padding for better coverage */
+  border-top-right-radius: 4px; 
+  border-top-left-radius: 4px; 
+}
+
+.inputBox input:focus ~ label,
+.inputBox input:not(:placeholder-shown) ~ label {
+  top: 0;
+  font-size: 0.75em;
+  
+  color: var(--accent-secondary);
+  text-shadow: 0 0 5px var(--accent-secondary);
+  transform: translateY(-50%);
+  z-index: 3; /* Bring above input border */
+    background: rgba(10, 10, 35, 0.9);
+}
+
+
+    .form .links {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.95em;
+      margin-top: 5px;
+    }
+
+    .form .links a {
+      text-decoration: none;
+      color: var(--secondary-text);
+      transition: all 0.3s ease;
+      cursor: pointer;
+      position: relative;
+      padding: 5px 0;
+      font-family: 'manrope','sans-serif';
+    }
+
+    .form .links a:hover {
+      color: var(--accent-secondary);
+      text-shadow: 0 0 5px var(--accent-secondary);
+    }
+
+    .form .links a::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 0;
+      height: 1px;
+      background: var(--accent-secondary);
+      transition: width 0.3s ease;
+    }
+
+    .form .links a:hover::after {
+      width: 100%;
+    }
+
+    .form input[type="submit"] {
+      padding: 14px;
+      background: linear-gradient(45deg, var(--accent), var(--accent-secondary));
+      color: #ffff;
+      font-weight: 700;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 1.1em;
+      letter-spacing: 1px;
+      margin-top: 10px;
+      box-shadow: 0 5px 15px rgba(255, 42, 120, 0.4);
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .form input[type="submit"]::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+      transition: 0.5s;
+    }
+
+    .form input[type="submit"]:hover::before {
+      left: 100%;
+    }
+
+    .form input[type="submit"]:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 20px rgba(255, 42, 120, 0.6);
+    }
+
+    .form input[type="submit"]:active {
+      transform: translateY(0);
+      box-shadow: 0 3px 10px rgba(255, 42, 120, 0.4);
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 900px) {
+      .container {
+        min-height: auto;
+      }
+      
+      .card-container {
+        max-width: 380px;
+        height: 540px; /* Adjusted for mobile */
+      }
+      
+      .card-face {
+        padding: 30px;
+      }
+    }
+
+    @media (max-width: 600px) {
+      .card-container {
+        max-width: 90%;
+        height: 520px; /* Adjusted for mobile */
+      }
+      
+      .card-face {
+        padding: 25px;
+      }
+      
+      .card-face h2 {
+        font-size: 1.8em;
+      }
+      
+      .inputBox input {
+        padding: 16px 15px 8px 40px;
+      }
+      
+      .inputBox i {
+        font-size: 16px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .card-container {
+        height: 500px; /* Adjusted for small mobile */
+      }
+      
+      .card-face {
+        padding: 20px;
+      }
+      
+      .card-face h2 {
+        font-size: 1.6em;
+        margin-bottom: 20px;
+      }
+      
+      .form {
+        gap: 20px;
+      }
+      
+      .form .links {
+        flex-direction: column;
+        gap: 10px;
+        align-items: center;
+      }
+    }
+    /* Footer */
+    .footer {
+      position: absolute;
+      bottom: 20px;
+      right: 20px;
+      color: var(--secondary-text);
+      font-size: 0.8em;
+      text-align: right;
+    }
+
+  </style>
+</head>
+<body>
+  <!-- Background effects -->
+  <div class="matrix-bg"></div>
+  <div class="particles" id="particles"></div>
+  
+  <div class="container">
+    <div class="card-container">
+      <div class="card" id="authCard">
+        <!-- Login Form -->
+        <div class="card-face front">
+          <h2>VAULTSEC AUTH</h2>
+          <form class="form" id="loginForm">
+            <div class="inputBox">
+              <i class="fas fa-user"></i>
+              <input type="text" required placeholder=" ">
+              <label>Username</label>
+            </div>
+            <div class="inputBox">
+              <i class="fas fa-lock"></i>
+              <input type="password" required placeholder=" ">
+              <label>Password</label>
+            </div>
+            <div class="links">
+              <a href="#">Forgot Credentials?</a>
+              <a onclick="flipCard()">Create Account</a>
+            </div>
+            <input type="submit" value="ACCESS SYSTEM">
+          </form>
+        </div>
+
+        <!-- Signup Form -->
+        <div class="card-face back">
+          <h2>CREATE ACCOUNT</h2>
+          <form class="form" id="signupForm">
+            <div class="inputBox">
+              <i class="fas fa-id-card"></i>
+              <input type="text" required placeholder=" ">
+              <label>Full Name</label>
+            </div>
+            <div class="inputBox">
+              <i class="fas fa-envelope"></i>
+              <input type="email" required placeholder=" ">
+              <label>Email</label>
+            </div>
+            <div class="inputBox">
+              <i class="fas fa-key"></i>
+              <input type="password" required placeholder=" ">
+              <label>Password</label>
+            </div>
+            <div class="inputBox">
+              <i class="fas fa-key"></i>
+              <input type="password" required placeholder=" ">
+              <label>Confirm Password</label>
+            </div>
+            <div class="links">
+              <a onclick="flipCard()">Back to Login</a>
+            </div>
+            <input type="submit" value="REGISTER">
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+
+  <div class="footer">
+    CYBERPORTAL v2.3.8<br><br>
+    SECURE CONNECTION
+  </div>
+
+  <script>
+    // Create particles
+    const particlesContainer = document.getElementById('particles');
+    for (let i = 0; i < 30; i++) {
+      const particle = document.createElement('div');
+      particle.classList.add('particle');
+      particle.style.width = `${Math.random() * 5 + 1}px`;
+      particle.style.height = particle.style.width;
+      particle.style.left = `${Math.random() * 100}%`;
+      particle.style.top = `${Math.random() * 100}%`;
+      particle.style.animationDuration = `${Math.random() * 20 + 10}s`;
+      particle.style.animationDelay = `${Math.random() * 5}s`;
+      particlesContainer.appendChild(particle);
+    }
+    
+    // Flip card function
+    function flipCard() {
+      const card = document.getElementById('authCard');
+      card.classList.toggle('flipped');
+    }
+    
+    // Form submission
+    document.getElementById('loginForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      alert('Login attempt detected. Security protocols engaged.');
+    });
+    
+    document.getElementById('signupForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      alert('Registration request received. Security verification in progress.');
+    });
+    
+    // Show terminal on focus
+    document.querySelectorAll('input').forEach(input => {
+      input.addEventListener('focus', () => {
+        document.querySelector('.terminal').style.display = 'block';
+      });
+      
+      input.addEventListener('blur', () => {
+        document.querySelector('.terminal').style.display = 'none';
+      });
+    });
+  </script>
+</body>
+</html>

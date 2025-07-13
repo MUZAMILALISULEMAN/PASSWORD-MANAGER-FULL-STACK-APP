@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CyberSec Login</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&family=Share+Tech+Mono&display=swap');
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      background: #000;
+      font-family: 'Quicksand', sans-serif;
+      overflow: hidden;
+    }
+    
+    section {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 2px;
+      flex-wrap: wrap;
+      overflow: hidden;
+      z-index: 2;
+    }
+    
+    section::before {
+      content: '';
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(#000, #0f0, #000);
+      animation: animate 5s linear infinite;
+    }
+    
+    @keyframes animate {
+      0% {
+        transform: translateY(-100%);
+      }
+      100% {
+        transform: translateY(100%);
+      }
+    }
+    
+    .grid-item {
+      position: relative;
+      display: block;
+      width: calc(6.25vw - 2px);
+      height: calc(6.25vw - 2px);
+      background: #181818;
+      z-index: 2;
+      transition: 1.5s;
+    }
+    
+    .grid-item:hover {
+      background: #0f0;
+      transition: 0s;
+    }
+    
+    section .signin {
+      position: absolute;
+      width: 400px;
+      background: rgba(10, 10, 10, 0.9);
+      z-index: 1000;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 40px;
+      border-radius: 4px;
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.9);
+      border: 1px solid #0f0;
+      backdrop-filter: blur(5px);
+    }
+    
+    section .signin .content {
+      position: relative;
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      gap: 40px;
+    }
+    
+    section .signin .content h2 {
+      font-size: 2em;
+      color: #0f0;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      text-shadow: 0 0 10px #0f0;
+    }
+    
+    section .signin .content .form {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 25px;
+    }
+    
+    section .signin .content .form .inputBox {
+      position: relative;
+      width: 100%;
+    }
+    
+    section .signin .content .form .inputBox input {
+      position: relative;
+      width: 100%;
+      background: rgba(30, 30, 30, 0.8);
+      border: 1px solid #0a0;
+      outline: none;
+      padding: 25px 10px 7.5px;
+      border-radius: 4px;
+      color: #fff;
+      font-weight: 500;
+      font-size: 1em;
+      transition: 0.3s;
+    }
+    
+    section .signin .content .form .inputBox input:focus {
+      border-color: #0f0;
+      box-shadow: 0 0 10px #0f0;
+    }
+    
+    section .signin .content .form .inputBox i {
+      position: absolute;
+      left: 0;
+      padding: 15px 10px;
+      font-style: normal;
+      color: #aaa;
+      transition: 0.5s;
+      pointer-events: none;
+    }
+    
+    .signin .content .form .inputBox input:focus ~ i,
+    .signin .content .form .inputBox input:valid ~ i {
+      transform: translateY(-7.5px);
+      font-size: 0.8em;
+      color: #0f0;
+    }
+    
+    .signin .content .form .links {
+      position: relative;
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+    }
+    
+    .signin .content .form .links a {
+      color: #aaa;
+      text-decoration: none;
+      transition: 0.3s;
+    }
+    
+    .signin .content .form .links a:hover {
+      color: #0f0;
+      text-shadow: 0 0 5px #0f0;
+    }
+    
+    .signin .content .form .links a:nth-child(2) {
+      color: #0f0;
+      font-weight: 600;
+    }
+    
+    .signin .content .form .inputBox input[type="submit"] {
+      padding: 15px;
+      background: linear-gradient(45deg, #0a0, #0f0);
+      color: #000;
+      font-weight: 700;
+      font-size: 1.2em;
+      letter-spacing: 0.05em;
+      cursor: pointer;
+      border: none;
+      transition: 0.3s;
+      text-transform: uppercase;
+      box-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+    }
+    
+    input[type="submit"]:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 0 15px #0f0;
+    }
+    
+    input[type="submit"]:active {
+      opacity: 0.8;
+      transform: translateY(0);
+    }
+    
+    .branding {
+      position: absolute;
+      bottom: 20px;
+      color: #0a0;
+      font-size: 0.9em;
+      text-align: center;
+      width: 100%;
+      z-index: 1000;
+      opacity: 0.7;
+    }
+    
+    .password-toggle {
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      cursor: pointer;
+      color: #aaa;
+      font-size: 0.9em;
+    }
+    
+    .password-toggle:hover {
+      color: #0f0;
+    }
+    
+    .hacker-text {
+      color: #0f0;
+      text-shadow: 0 0 5px #0f0;
+    }
+    
+    @media (max-width: 900px) {
+      .grid-item {
+        width: calc(10vw - 2px);
+        height: calc(10vw - 2px);
+      }
+      
+      section .signin {
+        width: 350px;
+      }
+    }
+    
+    @media (max-width: 600px) {
+      .grid-item {
+        width: calc(20vw - 2px);
+        height: calc(20vw - 2px);
+      }
+      
+      section .signin {
+        width: 90%;
+        padding: 30px 20px;
+      }
+      
+      section .signin .content h2 {
+        font-size: 1.5em;
+      }
+    }
+  </style>
+</head>
+<body>
+  <section>
+
+    <div class="signin">
+      <div class="content">
+        <h2>System <span class="hacker-text">Access</span></h2>
+        <div class="form">
+          <div class="inputBox">
+            <input type="text" required id="username">
+            <i>Username</i>
+          </div>
+          <div class="inputBox">
+            <input type="password" required id="password">
+            <i>Password</i>
+            <span class="password-toggle" id="togglePassword">Show</span>
+          </div>
+          <div class="links">
+            <a href="#">Recover Credentials</a>
+            <a href="#">Create Access</a>
+          </div>
+          <div class="inputBox">
+            <input type="submit" value="Authenticate" id="loginBtn">
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="branding">CYBERSECURITY PORTAL v2.5.8</div>
+  </section>
+  
+  <script>
+    // Create grid items
+    const section = document.querySelector('section');
+    const gridCount = 192; // Original count
+    
+    for (let i = 0; i < gridCount; i++) {
+      const gridItem = document.createElement('div');
+      gridItem.classList.add('grid-item');
+      section.insertBefore(gridItem, document.querySelector('.signin'));
+    }
+    
+    // Password toggle functionality
+    const togglePassword = document.getElementById('togglePassword');
+    const passwordInput = document.getElementById('password');
+    
+    togglePassword.addEventListener('click', () => {
+      const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+      passwordInput.setAttribute('type', type);
+      togglePassword.textContent = type === 'password' ? 'Show' : 'Hide';
+    });
+    
+    // Login functionality
+    const loginBtn = document.getElementById('loginBtn');
+    const usernameInput = document.getElementById('username');
+    
+    loginBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      
+      const username = usernameInput.value;
+      const password = passwordInput.value;
+      
+      if (!username || !password) {
+        alert('Please enter both username and password');
+        return;
+      }
+      
+      // Simulate authentication
+      loginBtn.value = 'Authenticating...';
+      loginBtn.disabled = true;
+      
+      // Simulate server delay
+      setTimeout(() => {
+        if (username === 'admin' && password === 'securepassword') {
+          // Success - flash effect
+          document.body.style.backgroundColor = '#0f0';
+          document.body.style.transition = 'background-color 0.5s';
+          
+          setTimeout(() => {
+            document.body.style.backgroundColor = '#000';
+            alert('Authentication successful! Access granted.');
+          }, 300);
+        } else {
+          // Error - shake effect
+          const signin = document.querySelector('.signin');
+          signin.style.animation = 'shake 0.5s';
+          
+          setTimeout(() => {
+            signin.style.animation = '';
+          }, 500);
+          
+          alert('Invalid credentials! Access denied.');
+        }
+        
+        loginBtn.value = 'Authenticate';
+        loginBtn.disabled = false;
+      }, 1500);
+    });
+    
+    // Add shake animation for CSS
+    const style = document.createElement('style');
+    style.textContent = `
+      @keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        20%, 60% { transform: translateX(-10px); }
+        40%, 80% { transform: translateX(10px); }
+      }
+    `;
+    document.head.appendChild(style);
+    
+    // Add hover sound effects
+    document.querySelectorAll('a, input[type="submit"]').forEach(el => {
+      el.addEventListener('mouseenter', () => {
+        // Create a simple beep sound using Web Audio API
+        try {
+          const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+          const oscillator = audioCtx.createOscillator();
+          const gainNode = audioCtx.createGain();
+          
+          oscillator.connect(gainNode);
+          gainNode.connect(audioCtx.destination);
+          
+          oscillator.type = 'sine';
+          oscillator.frequency.value = 800;
+          gainNode.gain.value = 0.1;
+          
+          oscillator.start();
+          setTimeout(() => {
+            oscillator.stop();
+          }, 100);
+        } catch (e) {
+          console.log('Audio not supported');
+        }
+      });
+    });
+  </script>
+</body> 
