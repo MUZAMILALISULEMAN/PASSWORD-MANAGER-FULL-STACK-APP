@@ -16,5 +16,47 @@
       const card = document.getElementById('authCard');
       card.classList.toggle('flipped');
     }
-    
-  
+    PASSWORD = null;
+    EMAIL = null;
+    FULL_NAME = null;
+
+document.getElementById("registerBTN").onsubmit = async()=>{
+
+  PASSWORD = document.getElementById("registerPASS").value;
+  EMAIL = document.getElementById("registerEMAIL").value;
+  FULL_NAME = document.getElementById("registerFNAME").value;
+
+
+if(!PASSWORD || !EMAIL || !FULL_NAME){
+  console.log("PLEASE FILL ALL FIELDS");
+  // return;
+}
+
+
+ try {
+          const response = await fetch('http://127.0.0.1:8000/submit', {
+            method: "POST",
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: {'email': `${EMAIL}`}
+          });
+
+          const result = await response.json();
+
+          if(result.status === "success"){
+              console.log(result.message);
+          }else{
+            console.log(result.message);
+          }
+  }
+catch{
+console.log("NETWORK ISSUE");
+
+}
+
+
+}
+
+
+ 
