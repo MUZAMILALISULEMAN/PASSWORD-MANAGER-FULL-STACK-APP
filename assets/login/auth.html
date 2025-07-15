@@ -1,85 +1,126 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Cyber Portal</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500&family=Sora:wght@500;600&family=VT323&display=swap" rel="stylesheet">
-
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link rel="stylesheet" href="auth.css">
-  
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VaultSec Authentication</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500&family=Sora:wght@500;600&family=VT323&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="auth.css">
 </head>
 <body>
-  <!-- Background effects -->
-  <div class="matrix-bg"></div>
-  <div class="particles" id="particles"></div>
-  
-  <div class="container">
-    <div class="card-container">
-      <div class="card" id="authCard">
+    <div class="auth-container">
+        <div class="auth-header">
+            <h1><i class="fas fa-shield-alt"></i> VaultSec</h1>
+            <p class="tagline">Secure Authentication Portal</p>
+        </div>
+        
+        <div class="auth-tabs">
+            <div class="auth-tab active" data-tab="login">LOGIN</div>
+            <div class="auth-tab" data-tab="register">REGISTER</div>
+        </div>
+        
         <!-- Login Form -->
-        <div class="card-face front">
-          <h2>VAULTSEC AUTH</h2>
-          <form class="form" id="loginForm">
-            <div class="inputBox">
-              <i class="fas fa-user"></i>
-              <input type="text" required placeholder=" ">
-              <label>Username</label>
+        <form id="login-form" class="auth-form active">
+            <div class="form-group">
+                <label for="login-email">Email Address</label>
+                <input type="email" id="login-email" placeholder="user@example.com"  >
             </div>
-            <div class="inputBox">
-              <i class="fas fa-lock"></i>
-              <input type="password" required placeholder=" ">
-              <label>Password</label>
+            
+            <div class="form-group">
+                <label for="login-password">Password</label>
+                <div class="password-container">
+                    <input type="password" id="login-password" placeholder="Enter your password"  >
+                    <button class="toggle-password" type="button">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                </div>
             </div>
-            <div class="links">
-              <a href="#">Forgot Credentials?</a>
-              <a onclick="flipCard()">Create Account</a>
+            
+            <button type="submit" class="auth-button">
+                <i class="fas fa-lock-open"></i> SIGN IN
+            </button>
+            
+            <div class="form-footer">
+                <p>Don't have an account? <a href="#" id="switch-to-register">Register now</a></p>
             </div>
-            <input type="submit" value="ACCESS SYSTEM">
-          </form>
+        </form>
+        
+        <!-- Registration Form -->
+        <form id="register-form" class="auth-form">
+            <div class="form-group">
+                <label for="register-name">Full Name</label>
+                <input type="text" id="register-name" placeholder="John Smith"  >
+            </div>
+            
+            <div class="form-group">
+                <label for="register-email">Email Address</label>
+                <input type="email" id="register-email" placeholder="user@example.com"  >
+            </div>
+            
+            <div class="form-group">
+                <label for="register-password">Password</label>
+                <div class="password-container">
+                    <input type="password" id="register-password" placeholder="Create a strong password"  >
+                    <button class="toggle-password" type="button">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="register-confirm">Confirm Password</label>
+                <div class="password-container">
+                    <input type="password" id="register-confirm" placeholder="Confirm your password"  >
+                    <button class="toggle-password" type="button">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <button type="submit" class="auth-button">
+                <i class="fas fa-user-plus"></i> CREATE ACCOUNT
+            </button>
+            
+            <div class="form-footer">
+                <p>Already have an account? <a href="#" id="switch-to-login">Sign in</a></p>
+            </div>
+        </form>
+        <!-- Add this after the registration form -->
+<form id="verify-otp-form" class="auth-form">
+    <div class="form-group">
+        <label for="otp">Verification Code</label>
+        <div class="otp-container">
+            <div class="otp-inputs">
+                <input type="text" id="otp1" class="otp-digit" maxlength="1" autocomplete="off">
+                <input type="text" id="otp2" class="otp-digit" maxlength="1" autocomplete="off">
+                <input type="text" id="otp3" class="otp-digit" maxlength="1" autocomplete="off">
+                <input type="text" id="otp4" class="otp-digit" maxlength="1" autocomplete="off">
+                <input type="text" id="otp5" class="otp-digit" maxlength="1" autocomplete="off">
+                <input type="text" id="otp6" class="otp-digit" maxlength="1" autocomplete="off">
+            </div>
         </div>
-
-        <!-- Signup Form -->
-        <div class="card-face back">
-          <h2>CREATE ACCOUNT</h2>
-          <form class="form" id="signupForm">
-            <div class="inputBox">
-              <i class="fas fa-id-card"></i>
-              <input type="text" required placeholder=" " id="registerFNAME">
-              <label>Full Name</label>
-            </div>
-            <div class="inputBox">
-              <i class="fas fa-envelope"></i>
-              <input type="email" required placeholder=" " id="registerEMAIL">
-              <label>Email</label>
-            </div>
-            <div class="inputBox">
-              <i class="fas fa-key"></i>
-              <input type="password" required placeholder=" " id="registerPASS">
-              <label>Password</label>
-            </div>
-            <div class="inputBox">
-              <i class="fas fa-key"></i>
-              <input type="password" required placeholder=" " id="registerPASSCONFIRM">
-              <label>Confirm Password</label>
-            </div>
-            <div class="links">
-              <a onclick="flipCard()">Back to Login</a>
-            </div>
-            <input type="submit" value="REGISTER" id="registerBTN">
-          </form>
-        </div>
-      </div>
     </div>
-  </div>
-  
-  <div id="toast-container"></div>
-  <div class="footer">
-    CYBERPORTAL v2.3.8<br><br>
-    SECURE CONNECTION
-  </div>
+    
+    <div class="otp-timer">
+        <div id="timer">01:00</div>
+    </div>
+    
+    <button type="submit" class="auth-button">
+        <i class="fas fa-shield-check"></i> VERIFY ACCOUNT
+    </button>
+    
+    <div class="form-footer">
+        <p>Didn't receive the code? <a href="#" id="resend-otp">Resend OTP</a></p>
+    </div>
+</form>
+        
+        <div class="encryption-status">
+            <div class="status-indicator"></div>
+            <div><strong>Connection Secured</strong> • AES-256 Encryption Active</div>
+        </div>
+    </div>
 
-  <script src="auth.js"></script>
+    <script src="auth.js"></script>
 </body>
 </html>
