@@ -133,7 +133,7 @@ function generateOTP() {
 function startOTPTimer() {
     let timeLeft = 300;
     
-    document.getElementById('timer').textContent = "01:00";
+    document.getElementById('timer').textContent = "05:00";
     
     otpTimer = setInterval(() => {
         timeLeft--;
@@ -152,24 +152,24 @@ function startOTPTimer() {
 }
 
 // Send OTP to email (simulated)
-function sendOTP(email) {
-    userEmail = email;
-    otpCode = generateOTP();
+// function sendOTP(email) {
+//     userEmail = email;
+//     otpCode = generateOTP();
     
-    // Simulate API call to send OTP
-    showToast(`OTP sent to ${email}`, 'info');
+//     // Simulate API call to send OTP
+//     showToast(`OTP sent to ${email}`, 'info');
     
-    // Show OTP form
-    document.querySelectorAll('.auth-form').forEach(form => form.classList.remove('active'));
-    document.getElementById('verify-otp-form').classList.add('active');
+//     // Show OTP form
+//     document.querySelectorAll('.auth-form').forEach(form => form.classList.remove('active'));
+//     document.getElementById('verify-otp-form').classList.add('active');
     
-    // Start timer
-    startOTPTimer();
+//     // Start timer
+//     startOTPTimer();
     
-    // Disable resend button temporarily
-    document.getElementById('resend-otp').style.opacity = "0.5";
-    document.getElementById('resend-otp').style.pointerEvents = "none";
-}
+//     // Disable resend button temporarily
+//     document.getElementById('resend-otp').style.opacity = "0.5";
+//     document.getElementById('resend-otp').style.pointerEvents = "none";
+// }
 
 // Verify OTP
 function verifyOTP() {
