@@ -1,3 +1,8 @@
+//GLOBAL;
+const URL = "http://127.0.0.1:8000";
+let FULL_NAME;
+let EMAIL;
+let PASSWORD;
 // Global variables for input fields
 const loginEmail = document.getElementById('login-email');
 const loginPassword = document.getElementById('login-password');
@@ -55,7 +60,13 @@ function initToastContainer() {
         document.body.appendChild(container);
     }
 }
-
+function clearFields(tab){
+    if(tab==="login"){
+        clearRegisterFields()
+    }else if(tab === "register"){
+        clearLoginFields();
+    }
+}
 // Clear login form fields
 function clearLoginFields() {
     loginEmail.value = '';
@@ -70,6 +81,19 @@ function clearRegisterFields() {
     registerConfirm.value = '';
 }
 
+function clearVariables(){
+FULL_NAME = "";
+EMAIL = "";
+PASSWORD = "";
+}
+function showOTPForm() {
+    document.querySelectorAll('.auth-form').forEach(form => {
+        form.classList.remove('active');
+    });
+    document.getElementById('verify-otp-form').classList.add('active');
+    startOTPTimer();  // Start the countdown
+}
+
 // Tab switching functionality
 function initTabSwitching() {
     const tabs = document.querySelectorAll('.auth-tab');
@@ -78,7 +102,7 @@ function initTabSwitching() {
     tabs.forEach(tab => {
         tab.addEventListener('click', function() {
             const target = this.getAttribute('data-tab');
-            
+            clearFields(target)
             // Update active tab
             tabs.forEach(t => t.classList.remove('active'));
             this.classList.add('active');
@@ -121,14 +145,6 @@ function initPasswordToggle() {
 }
 
 let otpTimer;
-let otpCode = "";
-let userEmail = "";
-
-// Generate random OTP
-function generateOTP() {
-    return Math.floor(100000 + Math.random() * 900000).toString();
-}
-
 // Start OTP timer
 function startOTPTimer() {
     let timeLeft = 300;
@@ -151,134 +167,75 @@ function startOTPTimer() {
     }, 1000);
 }
 
-// Send OTP to email (simulated)
-// function sendOTP(email) {
-//     userEmail = email;
-//     otpCode = generateOTP();
-    
-//     // Simulate API call to send OTP
-//     showToast(`OTP sent to ${email}`, 'info');
-    
-//     // Show OTP form
-//     document.querySelectorAll('.auth-form').forEach(form => form.classList.remove('active'));
-//     document.getElementById('verify-otp-form').classList.add('active');
-    
-//     // Start timer
-//     startOTPTimer();
-    
-//     // Disable resend button temporarily
-//     document.getElementById('resend-otp').style.opacity = "0.5";
-//     document.getElementById('resend-otp').style.pointerEvents = "none";
-// }
-
-// Verify OTP
-function verifyOTP() {
-    const enteredOTP = Array.from({length: 6}, (_, i) => 
-        document.getElementById(`otp${i+1}`).value
-    ).join('');
-    
-    if (!enteredOTP || enteredOTP.length !== 6) {
-        showToast('Please enter the complete OTP code', 'error');
-        return false;
-    }
-    
-    if (enteredOTP === otpCode) {
-        // Clear timer
-        clearInterval(otpTimer);
-        
-        // Show success
-        document.querySelector('.auth-container').classList.add('verified');
-        showToast('Account verified successfully!', 'success');
-        
-        // Redirect to login after delay
-        setTimeout(() => {
-            document.querySelector('.auth-container').classList.remove('verified');
-            document.querySelector('.auth-tab[data-tab="login"]').click();
-            showToast('Your account is now active. Please login.', 'success');
-        }, 3000);
-        
-        return true;
-    } else {
-        showToast('Invalid OTP code. Please try again.', 'error');
-        return false;
-    }
-}
-
-// Initialize OTP functionality
-function initOTP() {
-    // Setup OTP input navigation
-    const otpInputs = document.querySelectorAll('.otp-digit');
-    
-    otpInputs.forEach((input, index) => {
-        input.addEventListener('input', () => {
-            if (input.value.length === 1 && index < otpInputs.length - 1) {
-                otpInputs[index + 1].focus();
-            }
-        });
-        
-        input.addEventListener('keydown', (e) => {
-            if (e.key === 'Backspace' && input.value === '' && index > 0) {
-                otpInputs[index - 1].focus();
-            }
-        });
-    });
-    
-    // OTP form submission
-    document.getElementById('verify-otp-form').addEventListener('submit', function(e) {
-        e.preventDefault();
-        verifyOTP();
-    });
-    
-    // Resend OTP
-    document.getElementById('resend-otp').addEventListener('click', function(e) {
-        e.preventDefault();
-        if (userEmail) {
-            sendOTP(userEmail);
-        }
-    });
-}
-
-
 
 // Form submission handlers
 function initRegisterFormSubmission() {
-
+    
     // Registration form
-    document.getElementById('register-form').addEventListener('submit', function(e) {
+    document.getElementById('register-form').addEventListener('submit', async function(e) {
+        clearVariables();
         e.preventDefault();
-        
-        const name = registerName.value;
-        const email = registerEmail.value;
-        const password = registerPassword.value;
         const confirmPassword = registerConfirm.value;
         
-        if (!name || !email || !password || !confirmPassword) {
+        if (!registerPassword.value || !registerEmail.value || !registerPassword.value || !confirmPassword) {
             showToast('Please fill in all fields', 'error');
             return;
         }
         
-        if (password !== confirmPassword) {
+        if (registerPassword.value !== confirmPassword) {
             showToast('Passwords do not match', 'error');
             return;
         }
         
-        if (password.length < 8) {
+        if (registerPassword.value.length < 8) {
             showToast('Password must be at least 8 characters', 'error');
             return;
         }
-        
-        // Simulate registration
-        showToast('Creating account...', 'info');
-        
-        // In a real app, you would make an API call here
-        showToast('Account created! Verifying email...', 'success');
-        
-        // Send OTP to email
-        setTimeout(() => {
-            sendOTP(email);
-        }, 1500);
-    });
+
+        //SET GLOBALS
+        FULL_NAME = registerName.value;
+        EMAIL = registerEmail.value;
+        PASSWORD = registerPassword.value;
+
+        try {
+
+          const response = await fetch(`${URL}/submit/`, {
+            method: "POST",
+            headers: {
+                "Cache-Control": "no-cache",
+                "Pragma": "no-cache",
+                'Content-Type': 'application/json',
+            },
+            body :JSON.stringify({ email: EMAIL })
+          });
+          let result;
+try{
+
+    result = await response.json();
+}catch{
+    showToast("NETWORK ISSUE!","error");
 }
+        showToast(result.message,result.status);
+          if(result.status == "error"){
+            return;
+          }
+          showOTPForm();
+
+          
+  }
+catch{
+showToast("NETWORK ISSUE!","error");
+}
+
+clearRegisterFields();
+})
+
+}
+
+
+
+
+
 const zapContainer = document.createElement('div');
 zapContainer.id = 'zap-container';
 document.body.appendChild(zapContainer);
@@ -366,100 +323,167 @@ function initSecurityZaps() {
     setInterval(createZap, 2000);
     createZap();
 }
-// Initialize everything
+
+//OTP
+// Add this to your existing auth.js file
+
+// OTP Handling Functions
+function initOTPInputs() {
+    const otpInputs = document.querySelectorAll('.otp-digit');
+    
+    otpInputs.forEach((input, index) => {
+        // Auto-tab between inputs
+        input.addEventListener('input', () => {
+            if (input.value.length === 1 && index < otpInputs.length - 1) {
+                otpInputs[index + 1].focus();
+            }
+        });
+        
+        // Handle backspace/delete
+        input.addEventListener('keydown', (e) => {
+            if (e.key === 'Backspace' && input.value === '' && index > 0) {
+                otpInputs[index - 1].focus();
+            }
+        });
+    });
+}
+
+function initOTPFormSubmission() {
+    const otpForm = document.getElementById('verify-otp-form');
+    const otpInputs = document.querySelectorAll('.otp-digit');
+    
+    otpForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        // Collect OTP digits   
+        const otp = Array.from(otpInputs).map(input => input.value).join('');
+        
+        if (otp.length !== 6) {
+            showToast('Please enter a complete 6-digit code', 'error');
+            return;
+        }
+
+        try {
+            // Show loading state
+            const submitBtn = otpForm.querySelector('.auth-button');
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> VERIFYING...';
+            submitBtn.disabled = true;
+            
+            // Simulate API call
+            const response = await fetch(`${URL}/verify/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    email: EMAIL,
+                    otp_code: otp,
+                    password:PASSWORD,
+                    name:FULL_NAME
+                })
+            });
+            
+            const result = await response.json();
+            
+            if (result.status === 'success') {
+                // Add success animation
+                otpInputs.forEach(input => input.classList.add('verified'));
+                
+                showToast('Account verified successfully!', 'success');
+                
+                // Redirect after delay
+                setTimeout(() => {
+                    // Switch to login form
+                    document.querySelector('.auth-tab[data-tab="login"]').click();
+                    clearVariables();
+                }, 2000);
+            } else {
+                showToast(result.message || 'Verification failed', 'error');
+                // Reset button state
+                submitBtn.innerHTML = '<i class="fas fa-shield-check"></i> VERIFY ACCOUNT';
+                submitBtn.disabled = false;
+            }
+        } catch (error) {
+            showToast('Network error. Please try again.', 'error');
+            // Reset button state
+            const submitBtn = otpForm.querySelector('.auth-button');
+            submitBtn.innerHTML = '<i class="fas fa-shield-check"></i> VERIFY ACCOUNT';
+            submitBtn.disabled = false;
+        }
+        clearOTPFields();
+    });
+    
+}
+
+function initResendOTP() {
+    document.getElementById('resend-otp').addEventListener('click', async function(e) {
+        e.preventDefault();
+        
+        // Disable link temporarily
+        this.style.pointerEvents = 'none';
+        this.style.opacity = '0.5';
+        
+        try {
+            const response = await fetch(`${URL}/submit/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ email: EMAIL })
+            });
+            
+            const result = await response.json();
+            
+            if (result.status === 'success') {
+                showToast('New OTP sent!', 'success');
+                // Reset timer
+                clearInterval(otpTimer);
+                startOTPTimer();
+            } else {
+                showToast(result.message || 'Failed to resend OTP', 'error');
+                // Re-enable link
+                this.style.pointerEvents = 'auto';
+                this.style.opacity = '1';
+            }
+        } catch (error) {
+            showToast('Network error. Please try again.', 'error');
+            // Re-enable link
+            this.style.pointerEvents = 'auto';
+            this.style.opacity = '1';
+        }
+    });
+}
+
+function clearOTPFields() {
+    document.querySelectorAll('.otp-digit').forEach(input => {
+        input.value = '';
+        input.classList.remove('verified');
+    });
+}
+
+// Update initAuthPage to include OTP functions
 function initAuthPage() {
     initToastContainer();
     initTabSwitching();
     initPasswordToggle();
     initRegisterFormSubmission();
     initSecurityZaps();
-    initOTP();
+    initOTPInputs();          // Initialize OTP inputs
+    initOTPFormSubmission();  // Initialize OTP form submission
+    initResendOTP();          // Initialize resend OTP
+    
+    // Add form switching for OTP
+    document.getElementById('resend-otp').addEventListener('click', (e) => {
+        e.preventDefault();
+        // Re-send OTP logic will be handled elsewhere
+    });
 }
+
+// Show OTP form after successful registration
+
 
 // Initialize the page
 initAuthPage();
-    
-//     let PASSWORD = "";
-//     let EMAIL = "";
-//     let FULL_NAME = "";
-    
-//     function clearVariables(){
-//       PASSWORD = "";
-//       EMAIL = "";
-//       FULL_NAME = "";
-//     }
-    
-    
-
-// // REGISTER
-//   let REG_PASSWORD = document.getElementById("registerPASS");
-//   let REG_PASSWORD_CONFIRM = document.getElementById("registerPASSCONFIRM");
-//   let REG_EMAIL = document.getElementById("registerEMAIL");
-//   let REG_FULL_NAME = document.getElementById("registerFNAME");
-
-// function regformClear(){
-//     REG_PASSWORD.value = "";
-//     REG_PASSWORD_CONFIRM.value = "";
-//     REG_EMAIL.value = "";
-//     REG_FULL_NAME.value = "";
-//     }
-
-// function isValidEmail(email) {
-//   const pattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-//   return pattern.test(email);
-// }
-
-
-// document.getElementById("signupForm").onsubmit = async(e)=>{
-//   e.preventDefault();
-//   clearVariables();
-// if(REG_PASSWORD.value !== REG_PASSWORD_CONFIRM.value){
-//   console.log("PASSWORD DONT MATCH")
-//   return;
-// }
-// if(!isValidEmail(REG_EMAIL)){
-//   console.log("PLEASE ENTER VALID EMAIL"); 
-//   return;
-// }
-// if(REG_PASSWORD.value < 6){
-//   console.log("TOO SMALL, MINIMUM PASSWORD LENGTH IS 8");  
-//   return;
-// }
-
-//   PASSWORD = REG_PASSWORD.value;  
-//   EMAIL = REG_EMAIL.value;
-//   FULL_NAME = REG_FULL_NAME.value;
-
-
-
-// try {
-
-//           const response = await fetch('http://127.0.0.1:8000/submit', {
-//             method: "POST",
-//             headers: {
-//                 "Cache-Control": "no-cache",
-//                 "Pragma": "no-cache",
-//                 'Content-Type': 'application/json',
-//             },
-//             body :JSON.stringify({ email: EMAIL })
-//           });
-
-//           const result = await response.json();
-
-//           if(result.status === "success"){
-//               console.log(result.message);
-
-//           }else{
-//             console.log(result.message);
-//           }
-          
-//   }
-// catch{
-// console.log("NETWORK ISSUE");
-// }
-
-
-// }
 
 
  
