@@ -3,8 +3,8 @@ from datetime import datetime, timedelta
 from email.message import EmailMessage
 import asyncio
 import yagmail
-import jose
-from fastapi import FastAPI, Depends
+from jose import jwt,JWTError
+from fastapi import FastAPI, Depends,Request,Response
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
@@ -13,6 +13,8 @@ from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sess
 from sqlalchemy.orm import declarative_base
 from sqlalchemy.exc import SQLAlchemyError
 
+# ----------------------------- KEYS -------------------------------------
+secret_key = "MUZZYTHEBOSS"
 # ----------------------------- MODELS -----------------------------------
 class EmailRequest(BaseModel):
     email: str
@@ -38,7 +40,13 @@ async def send_email_async(to_email: str, otp_code: str):
             contents=f"Your OTP is {otp_code}"
         )
     await asyncio.to_thread(send_sync)
-
+def TokenMaker(email:str):
+    expiry_time = datetime.utcnow() + timedelta(minutes=15)
+    payload = {"email":email,
+               "exp":expiry_time}
+    token = jwt.encode(payload,secret_key,algorithm="HS256")
+    return token
+    
 # ---------------------------- DATABASE ----------------------------------
 
 engine = create_async_engine("mysql+aiomysql://root:%21%40%23muzzy2006@localhost/db")
@@ -162,13 +170,29 @@ async def verify(data: PayLoad, db: AsyncSession = Depends(GET_DB)):
     
 
 @app.post("/login")
-async def login(data: LoginPayload, db: AsyncSession = Depends(GET_DB)):
+async def login(response:Response,data: LoginPayload, db: AsyncSession = Depends(GET_DB)):
     try:    
         stmt = Select(USER.email,USER.password).where(USER.email == data.email,USER.password == data.password)
         res = await db.execute(stmt)
-        if res is not None:
-            
+        res = res.first()
+        message = "Login Failed"
+        if res:
+            response.set_cookie(
+                key="Access-Token",
+                value=TokenMaker(data.email),
+                httponly=True,
+                samesite=True
+            )
+            message = "Login Successful"
+            return {"status":"success","message":message}
+        else:
+            return {"status":"error","message":message}
+    except SQLAlchemyError:
+        await db.rollback()
+        return {"status": "error", "message": "Database Issue"}
     except Exception:
+            message = "Unexpected Error"
+            return {"status":"error","message":message}
         
     
 
