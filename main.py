@@ -189,7 +189,7 @@ async def login(response:Response,data: LoginPayload, db: AsyncSession = Depends
             return {"status":"error","message":message}
     except SQLAlchemyError:
         await db.rollback()
-        return {"status": "error", "message": "Database Issue"}
+        return {"status": "error", "message": "Database Issu"}
     except Exception:
             message = "Unexpected Error"
             return {"status":"error","message":message}
