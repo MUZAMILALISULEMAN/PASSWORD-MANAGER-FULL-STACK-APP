@@ -49,7 +49,7 @@ def TokenMaker(email:str):
     
 # ---------------------------- DATABASE ----------------------------------
 
-engine = create_async_engine("mysql+aiomysql://root:%21%40%23muzzy2006@localhost/db")
+engine = create_async_engine("mysql+aiomysql://muzzy:muzzy@localhost/db")
 SESSION = async_sessionmaker(class_=AsyncSession, expire_on_commit=False, bind=engine)
 
 async def GET_DB():
@@ -80,7 +80,17 @@ class OTPRequest(BASE_ENTITY):
         return datetime.utcnow() > self.expires_at
 
 # ----------------------------- APP SETUP --------------------------------
-app = FastAPI()
+from contextlib import asynccontextmanager
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    async with engine.begin() as conn:
+        await conn.run_sync(BASE_ENTITY.metadata.create_all)
+    yield
+
+app = FastAPI(lifespan=lifespan)
+
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -100,7 +110,7 @@ async def submit(data: EmailRequest, db: AsyncSession = Depends(GET_DB)):
         await db.commit()
 
         otpCode = generateOTP()
-        expires_at = datetime.utcnow() + timedelta(minutes=5)
+        expires_at = datetime.utcnow() + timedelta(minutes=1)
         payload = OTPRequest(email=data.email, otp_code=otpCode, expires_at=expires_at)
         db.add(payload)
         await db.commit()
@@ -113,7 +123,7 @@ async def submit(data: EmailRequest, db: AsyncSession = Depends(GET_DB)):
 
         message = f"OTP sent successfully to {data.email}"
 
-    except SQLAlchemyError:
+    except SQLAlchemyError as e:
         await db.rollback()
         status = "error"
         message = f"Database Issue"
@@ -175,13 +185,13 @@ async def login(response:Response,data: LoginPayload, db: AsyncSession = Depends
         stmt = Select(USER.email,USER.password).where(USER.email == data.email,USER.password == data.password)
         res = await db.execute(stmt)
         res = res.first()
-        message = "Login Failed"
+        message = "Invalid Credientials"
         if res:
             response.set_cookie(
                 key="Access-Token",
                 value=TokenMaker(data.email),
-                httponly=True,
-                samesite=True
+                max_age=60*15, 
+                samesite="None"
             )
             message = "Login Successful"
             return {"status":"success","message":message}
@@ -189,7 +199,7 @@ async def login(response:Response,data: LoginPayload, db: AsyncSession = Depends
             return {"status":"error","message":message}
     except SQLAlchemyError:
         await db.rollback()
-        return {"status": "error", "message": "Database Issu"}
+        return {"status": "error", "message": "Database Issue"}
     except Exception:
             message = "Unexpected Error"
             return {"status":"error","message":message}

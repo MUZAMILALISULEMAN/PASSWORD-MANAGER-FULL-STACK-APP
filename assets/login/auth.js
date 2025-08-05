@@ -147,9 +147,9 @@ function initPasswordToggle() {
 let otpTimer;
 // Start OTP timer
 function startOTPTimer() {
-    let timeLeft = 300;
+    let timeLeft = 60;
     
-    document.getElementById('timer').textContent = "05:00";
+    document.getElementById('timer').textContent = "01:00";
     
     otpTimer = setInterval(() => {
         timeLeft--;
@@ -163,8 +163,10 @@ function startOTPTimer() {
             clearInterval(otpTimer);
             document.getElementById('resend-otp').style.opacity = "1";
             document.getElementById('resend-otp').style.pointerEvents = "auto";
+            showToast("OTP Timed-Out","error");
         }
     }, 1000);
+
 }
 
 
@@ -199,7 +201,7 @@ function initRegisterFormSubmission() {
 
         try {
 
-          const response = await fetch(`${URL}/submit/`, {
+          const response = await fetch(`${URL}/submit`, {
             method: "POST",
             headers: {
                 "Cache-Control": "no-cache",
@@ -370,7 +372,7 @@ function initOTPFormSubmission() {
             submitBtn.disabled = true;
             
             // Simulate API call
-            const response = await fetch(`${URL}/verify/`, {
+            const response = await fetch(`${URL}/verify`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -424,7 +426,7 @@ function initResendOTP() {
         this.style.opacity = '0.5';
         
         try {
-            const response = await fetch(`${URL}/submit/`, {
+            const response = await fetch(`${URL}/submit`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -460,6 +462,47 @@ function clearOTPFields() {
         input.classList.remove('verified');
     });
 }
+function initLoginFormSubmission() {
+    document.getElementById('login-form').addEventListener('submit', async function(e) {
+        e.preventDefault(); // Prevent form refresh
+
+        const email = loginEmail.value.trim();
+        const password = loginPassword.value.trim();
+
+        if (!email || !password) {
+            showToast('Please enter both email and password', 'error');
+            return;
+        }
+
+        try {
+            const response = await fetch(`${URL}/login`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Cache-Control': 'no-cache',
+                    'Pragma': 'no-cache'
+                },
+                body: JSON.stringify({ email, password })
+            });
+
+            const result = await response.json();
+
+            if (result.status === 'success') {
+                showToast('Login successful!', 'success');
+                setTimeout(() => {
+                    window.location.href = '/index.html';
+                },1000);
+
+                clearLoginFields();  // Reset fields after login
+            } else {
+                showToast(result.message || 'Login failed', 'error');
+            }
+        } catch (error) {
+            showToast('Network error during login', 'error');
+        }
+    });
+}
+
 
 // Update initAuthPage to include OTP functions
 function initAuthPage() {
@@ -468,15 +511,11 @@ function initAuthPage() {
     initPasswordToggle();
     initRegisterFormSubmission();
     initSecurityZaps();
-    initOTPInputs();          // Initialize OTP inputs
-    initOTPFormSubmission();  // Initialize OTP form submission
-    initResendOTP();          // Initialize resend OTP
-    
-    // Add form switching for OTP
-    document.getElementById('resend-otp').addEventListener('click', (e) => {
-        e.preventDefault();
-        // Re-send OTP logic will be handled elsewhere
-    });
+    initOTPInputs();          
+    initOTPFormSubmission();  
+    initResendOTP();
+    initLoginFormSubmission()           
+   
 }
 
 // Show OTP form after successful registration
