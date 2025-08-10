@@ -7,18 +7,25 @@ from jose import jwt,JWTError
 from fastapi import FastAPI, Depends,Request,Response
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-
-from sqlalchemy import Column, Integer, String, DateTime, Boolean, Select, Update
+from fastapi.staticfiles import StaticFiles
+from sqlalchemy import Column, Integer, String, DateTime, Boolean, Select, Update,ForeignKey
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
 from sqlalchemy.orm import declarative_base
 from sqlalchemy.exc import SQLAlchemyError
+from passlib.context import CryptContext
+
+
+
 
 # ----------------------------- KEYS -------------------------------------
 secret_key = "MUZZYTHEBOSS"
 # ----------------------------- MODELS -----------------------------------
 class EmailRequest(BaseModel):
     email: str
-
+class EntryPayload(BaseModel):
+    email: str
+    title: str
+    password: str
 class PayLoad(BaseModel):
     email: str
     otp_code: str
@@ -40,6 +47,12 @@ async def send_email_async(to_email: str, otp_code: str):
             contents=f"Your OTP is {otp_code}"
         )
     await asyncio.to_thread(send_sync)
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+def HashPassword(password:str):
+    return pwd_context.hash(password)
+def VerifyPassword(password:str,hashPassword:str):
+    return pwd_context.verify(password,hashPassword)
+
 def TokenMaker(email:str):
     expiry_time = datetime.utcnow() + timedelta(minutes=15)
     payload = {"email":email,
@@ -63,7 +76,7 @@ class USER(BASE_ENTITY):
     id = Column(Integer, primary_key=True)
     name = Column(String(50), nullable=False)
     email = Column(String(50), nullable=False, unique=True)
-    password = Column(String(50), nullable=False)
+    password = Column(String(255), nullable=False)
 
 class OTPRequest(BASE_ENTITY):
     __tablename__ = "otp_requests"
@@ -78,6 +91,20 @@ class OTPRequest(BASE_ENTITY):
 
     def is_expired(self):
         return datetime.utcnow() > self.expires_at
+
+class Entry(BASE_ENTITY):
+    __tablename__ = "user_passwords"
+
+    no = Column(Integer, primary_key=True, autoincrement=True)
+    email = Column(
+        String(255),
+        ForeignKey("user.email", ondelete="CASCADE"),
+        nullable=False
+    )
+    title = Column(String(30), nullable=True)
+    email_address = Column(String(100), nullable=True)
+    password = Column(String(255), nullable=True)
+    time_stamp = Column(DateTime, default=datetime.utcnow)
 
 # ----------------------------- APP SETUP --------------------------------
 from contextlib import asynccontextmanager
@@ -159,7 +186,7 @@ async def verify(data: PayLoad, db: AsyncSession = Depends(GET_DB)):
 
                 return {"status": "error", "message": "Email is already registered"}
             
-            db.add(USER(name=data.name, email=data.email, password=data.password))
+            db.add(USER(name=data.name, email=data.email, password=HashPassword(data.password)))
             await db.commit()
             return {"status": "success", "message": "Verified"}
         else:
@@ -177,16 +204,18 @@ async def verify(data: PayLoad, db: AsyncSession = Depends(GET_DB)):
         return {"status": "error", "message": "Expected Error Occurs, Try Again"}
 
 
-    
+app.mount("/assets", StaticFiles(directory="assets"), name="assets")
 
 @app.post("/login")
 async def login(response:Response,data: LoginPayload, db: AsyncSession = Depends(GET_DB)):
     try:    
-        stmt = Select(USER.email,USER.password).where(USER.email == data.email,USER.password == data.password)
+        stmt = Select(USER.email,USER.password).where(USER.email==data.email)
         res = await db.execute(stmt)
         res = res.first()
+
         message = "Invalid Credientials"
-        if res:
+        if res and VerifyPassword(data.password,res[1]):
+            
             response.set_cookie(
                 key="Access-Token",
                 value=TokenMaker(data.email),
@@ -204,5 +233,11 @@ async def login(response:Response,data: LoginPayload, db: AsyncSession = Depends
             message = "Unexpected Error"
             return {"status":"error","message":message}
         
-    
-
+@app.post("/add")
+async def add(request:Request,data: EntryPayload, db: AsyncSession = Depends(GET_DB)):
+    try:
+        cookie = request.cookies.get("Access-Token")
+        # info = jwt.decode(cookie,secret_key,"HS256")
+        print(cookie)
+    except JWTError:
+        print("ERROR TOKEN EXPIRED")
